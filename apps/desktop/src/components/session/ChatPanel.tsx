@@ -404,8 +404,8 @@ export default function ChatPanel() {
         </div>
       )}
 
-      {/* Chat messages — newest at top */}
-      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2 space-y-2">
+      {/* Chat messages — newest at top, Discord-style spacing */}
+      <div className="flex-1 overflow-y-auto px-4 pt-2 pb-2">
         {chatMessages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-ghost-text-muted/30">
@@ -415,29 +415,38 @@ export default function ChatPanel() {
             <p className="text-[14px] text-ghost-text-muted text-center">Send a message to<br />your collaborators</p>
           </div>
         )}
-        {[...chatMessages].reverse().map((msg, i) => {
-          const origIndex = chatMessages.length - 1 - i;
-          return (
-          <div key={origIndex} className="group hover:bg-ghost-surface-hover/30 -mx-2 px-2 py-1.5 rounded transition-colors relative">
-            <p className="text-[14px] leading-snug">
-              <span className="font-semibold" style={{ color: msg.colour }}>{msg.displayName}</span>
-              <span className="text-ghost-text-secondary ml-1.5">{msg.text}</span>
-            </p>
-            {msg.userId === userId && (
-              <button
-                onClick={() => deleteMessage(origIndex)}
-                className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-ghost-text-muted hover:text-ghost-error-red hover:bg-ghost-surface transition-all"
-                title="Delete message"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-              </button>
-            )}
-          </div>
-        );
-        })}
+        {(() => {
+          const reversed = [...chatMessages].reverse();
+          return reversed.map((msg, i) => {
+            const origIndex = chatMessages.length - 1 - i;
+            const prevMsg = reversed[i - 1];
+            const sameUser = prevMsg && prevMsg.userId === msg.userId;
+            return (
+            <div key={origIndex} className={`group hover:bg-ghost-surface-hover/30 -mx-2 px-2 rounded transition-colors relative ${sameUser ? 'py-[1px]' : 'pt-2.5 pb-[1px]'}`}>
+              {!sameUser ? (
+                <p className="text-[14px] leading-[1.4]">
+                  <span className="font-semibold" style={{ color: msg.colour }}>{msg.displayName}</span>
+                  <span className="text-ghost-text-secondary ml-1.5">{msg.text}</span>
+                </p>
+              ) : (
+                <p className="text-[14px] leading-[1.4] text-ghost-text-secondary">{msg.text}</p>
+              )}
+              {msg.userId === userId && (
+                <button
+                  onClick={() => deleteMessage(origIndex)}
+                  className="absolute top-0.5 right-0.5 opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-ghost-text-muted hover:text-ghost-error-red hover:bg-ghost-surface transition-all"
+                  title="Delete message"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          );
+          });
+        })()}
       </div>
 
       {/* Chat input — Discord style */}
